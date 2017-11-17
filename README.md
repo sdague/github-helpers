@@ -102,5 +102,5 @@ bx wsk rule update SendGithubEmail time-for-github-email send-email
 You can test this with:
 
 ```bash
-bx wsk invoke --blocking send-email
+bx wsk action invoke --blocking send-email
 ```
