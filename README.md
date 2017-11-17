@@ -92,7 +92,7 @@ Once you've done that you can run the following:
 bx wsk trigger create time-for-github-email --feed /whisk.system/alarms/alarm -p cron '0 5 * * 6'
 
 # create an action for send-email
-bx wsk action update send-email send-email.py -P mail.json \
+bx wsk action update send-email actions/send-email.py -P mail.json \
     --param github_creds GitHubWebHook --docker sdague/python3action
 
 # connect trigger to action
