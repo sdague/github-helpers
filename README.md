@@ -62,7 +62,19 @@ definitions in github for you. This has to be done at a repo level.
 # build a package to store github creds
 bx wsk package bind /whisk.system/github GitHubWebHook --param-file github.json
 
+export WHISK_IMAGE="sdague/python3action"
 ```
+
+**Note:** these actions need a custom docker image because they need
+libraries beyond what's included in the base
+``openwhisk/python3action``. I've got a docker image at
+``sdague/python3action`` with those additions.
+
+You can also rebuild it easily by looking in the ``docker/`` directory
+and running the ``./buildAndPush.sh`` script. I make no guaruntees on
+the contents of my image, so if you are going to run with this long
+term, it's best to replace the image with your own.
+
 
 ### ack-github ###
 
@@ -73,7 +85,7 @@ bx wsk trigger create GitHubWebHookIssues --feed \
 
 # create an action for ack-github
 bx wsk action update ack-github actions/ack-github.py \
-   --param github_creds GitHubWebHook --docker sdague/python3action
+   --param github_creds GitHubWebHook --docker $WHISK_IMAGE
 
 # connect trigger to action with a rule
 bx wsk rule update GitHubWebHookIssues ack-github
@@ -106,11 +118,12 @@ Once you've done that you can run the following:
 
 ```bash
 # create a cron trigger for sending emails
-bx wsk trigger create time-for-github-email --feed /whisk.system/alarms/alarm -p cron '0 5 * * 6'
+bx wsk trigger create time-for-github-email \
+    --feed /whisk.system/alarms/alarm -p cron '0 5 * * 6'
 
 # create an action for send-email
 bx wsk action update send-email actions/send-email.py -P mail.json \
-    --param github_creds GitHubWebHook --docker sdague/python3action
+    --param github_creds GitHubWebHook --docker $WHISK_IMAGE
 
 # connect trigger to action
 bx wsk rule update SendGithubEmail time-for-github-email send-email
