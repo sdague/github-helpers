@@ -39,4 +39,68 @@ family wakes up are very good times to process things like this.
 
 ## Installation ##
 
-Coming soon....
+### Prereqs ###
+
+* signup for an IBM Cloud account -
+  https://console.bluemix.net/dashboard/apps
+* allocate a personal access token in github
+
+```bash
+# build a package to store github creds
+bx wsk package bind /whisk.system/github GitHubWebHook --param-file github.json
+
+```
+
+### ack-github ###
+
+```bash
+# create a trigger based on github webhook
+bx wsk trigger create GitHubWebHookIssues --feed \
+    GitHubWebHook/webhook --param events issues
+
+# create an action for ack-github
+bx wsk action update ack-github actions/ack-github.py \
+   --param github_creds GitHubWebHook --docker sdague/python3action
+
+# connect trigger to action with a rule
+bx wsk rule update GitHubWebHookIssues ack-github
+
+```
+
+### send-email ###
+
+There is no built in email system in openwhisk, as such you need to
+use an external system. I use fastmail.fm for personal email, which
+allows you to provision per application credentials (easy to track and
+revoke later if they leak).
+
+First create a ``mail.json`` file with the following content:
+
+```json
+{
+    "sender": "<fastmail account address>",
+    "to": "<email to send to>",
+    "passwd": "<app password>"
+}
+
+```
+
+Once you've done that you can run the following:
+
+```bash
+# create a cron trigger for sending emails
+bx wsk trigger create time-for-github-email --feed /whisk.system/alarms/alarm -p cron '0 5 * * 6'
+
+# create an action for send-email
+bx wsk action update send-email send-email.py -P mail.json \
+    --param github_creds GitHubWebHook --docker sdague/python3action
+
+# connect trigger to action
+bx wsk rule update SendGithubEmail time-for-github-email send-email
+```
+
+You can test this with:
+
+```bash
+bx wsk invoke --blocking send-email
+```
