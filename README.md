@@ -44,6 +44,19 @@ family wakes up are very good times to process things like this.
 * signup for an IBM Cloud account -
   https://console.bluemix.net/dashboard/apps
 * allocate a personal access token in github
+* put this access token into a github.json file like such
+
+```json
+{
+    "username": "<youruser>",
+    "repository": "<youruser>/<a repo>",
+    "accessToken": "<personal access token>"
+}
+```
+
+The repository is important because the builtin github system actions
+do the round trip to the github API and actually create the webhook
+definitions in github for you. This has to be done at a repo level.
 
 ```bash
 # build a package to store github creds
@@ -85,6 +98,10 @@ First create a ``mail.json`` file with the following content:
 
 ```
 
+We will be reusing the personal access token from the ack-github
+action. Given that this is a query only activity, it shouldn't need
+any other permissions.
+
 Once you've done that you can run the following:
 
 ```bash
@@ -104,3 +121,5 @@ You can test this with:
 ```bash
 bx wsk action invoke --blocking send-email
 ```
+
+That should send you an html email to the address you specified.
