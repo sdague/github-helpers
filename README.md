@@ -88,7 +88,7 @@ bx wsk action update ack-github actions/ack-github.py \
    --param github_creds GitHubWebHook --docker $WHISK_IMAGE
 
 # connect trigger to action with a rule
-bx wsk rule update GitHubWebHookIssues ack-github
+bx wsk rule update SendGitHubAck GitHubWebHookIssues ack-github
 
 ```
 
