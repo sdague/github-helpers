@@ -1,4 +1,4 @@
-
+from collections import namedtuple
 
 import requests
 import github
@@ -47,28 +47,30 @@ that you are listed as the owner for.
         html += open_issues_report(res.name, res.issues)
     return html
 
-
-def main(params):
-    passwd = params['passwd']
-    sender = params['sender']
-    to = params['to']
-    p = ow.params_from_pkg(params["github_creds"])
-
-    results = find_issues_by_owner(p['accessToken'])
+def send_report(email_from, email_to, email_pass, github_token):
+    results = find_issues_by_owner(github_token)
     html = email_report(results)
     msg = MIMEText(html, 'html')
     msg['Subject'] = 'Open Github Issues Report'
-    msg['From'] = sender
-    msg['To'] = to
+    msg['From'] = email_from
+    msg['To'] = email_to
     # Send the message via our own SMTP server.
     # return { 'message': "Worked! %s" % repos }
 
     s = smtplib.SMTP('smtp.fastmail.com', 587)
     s.ehlo()
     s.starttls()
-    s.login(sender, passwd)
+    s.login(email_from, email_pass)
     s.send_message(msg)
     s.quit()
 
+
+def main(params):
+    passwd = params['passwd']
+    sender = params['sender']
+    to = params['to']
+    github_token = ow.params_from_pkg(params["github_creds"])['accessToken']
+
+    send_report(sender, to, passwd, github_token)
 
     return { 'message': "Worked!" }
