@@ -22,20 +22,29 @@ def open_issues_report(name, issues):
     html += "</table>\n<p>"
     return html
 
-def email_report(token):
+def find_issues_by_owner(token):
     g = github.Github(token, per_page=100)
     repos = g.get_user().get_repos(type="owner")
 
+    results = list()
+    for r in repos:
+        issues = r.get_issues()
+        if (len(list(issues))):
+            report = namedtuple('Report', ['name', 'issues'])
+            report.name = r.full_name
+            report.issues = issues
+            results.append(report)
+    return results
+
+def email_report(results):
     html = """<p>
 Here is your current report of open github issues for projects
 that you are listed as the owner for.
 </p>"""
 
     # optimization, don't do archived projects
-    for r in repos:
-        issues = r.get_issues()
-        if (len(list(issues))):
-            html += open_issues_report(r.full_name, issues)
+    for res in results:
+        html += open_issues_report(res.name, res.issues)
     return html
 
 
@@ -45,7 +54,8 @@ def main(params):
     to = params['to']
     p = ow.params_from_pkg(params["github_creds"])
 
-    html = email_report(p['accessToken'])
+    results = find_issues_by_owner(p['accessToken'])
+    html = email_report(results)
     msg = MIMEText(html, 'html')
     msg['Subject'] = 'Open Github Issues Report'
     msg['From'] = sender
