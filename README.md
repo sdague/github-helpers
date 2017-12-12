@@ -136,3 +136,55 @@ bx wsk action invoke --blocking send-email
 ```
 
 That should send you an html email to the address you specified.
+
+### watched-keywords ###
+
+This is a different slice of the send-email script. For large projects
+that you might be involved in, looking at the whole issue queue is
+overwhelming. However, there might be a few topics that you feel like
+you have deep experience in, that you want to know if there are open
+issues.
+
+This builds a search query that you can run periodically for open
+issues, and get that collection emailed to you. You can probably at
+least triage them.
+
+First create a ``watched.json`` file with the following content:
+
+```json
+{
+    "sender": "<fastmail account address>",
+    "to": "<email to send to>",
+    "passwd": "<app password>",
+    "project": "<owner/repo>",
+    "keywords": ["<keyword1>", "<keyword2>", ...]
+}
+
+```
+
+We will be reusing the personal access token from the ack-github
+action. Given that this is a query only activity, it shouldn't need
+any other permissions.
+
+Once you've done that you can run the following:
+
+```bash
+# create a cron trigger for running this action
+bx wsk trigger create time-for-watched-email \
+    --feed /whisk.system/alarms/alarm -p cron '0 5 * * 6'
+
+# create an action for watched-keywords
+bx wsk action update watched-keywords actions/watched-keywords.py -P watched.json \
+    --param github_creds GitHubWebHook --docker $WHISK_IMAGE
+
+# connect trigger to action
+bx wsk rule update SendWatchedEmail time-for-watched-email watched-keywords
+```
+
+You can test this with:
+
+```bash
+bx wsk action invoke --blocking watched-keywords
+```
+
+That should send you an html email to the address you specified.
