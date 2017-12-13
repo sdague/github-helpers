@@ -41,10 +41,12 @@ family wakes up are very good times to process things like this.
 
 ### Prereqs ###
 
-* signup for an IBM Cloud account -
-  https://console.bluemix.net/dashboard/apps
-* allocate a personal access token in github
-* put this access token into a github.json file like such
+* signup for an IBM Cloud Functions account -
+  https://console.bluemix.net/openwhisk/ (a Lite account will be
+  sufficient for any of these actions)
+* allocate a personal access token for the github API -
+  https://github.com/settings/tokens
+* put this access token into a github.json file like such:
 
 ```json
 {
