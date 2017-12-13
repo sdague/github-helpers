@@ -14,8 +14,8 @@ ways I could do better with a little bot automation. Serverless makes
 for an ideal platform for this, because many of these operations are
 really just a couple of seconds of processing.
 
-These are all implemented on the BlueMix OpenWhisk platform in
-python.
+These are all implemented on the IBM Cloud Functions platform (based
+on Apache OpenWhisk) in python.
 
 ## Scripts ##
 
